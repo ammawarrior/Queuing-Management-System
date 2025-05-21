@@ -148,7 +148,7 @@ video {
     </style>
 </head>
 <body>
-<audio id="notify-sound" src="assets/sounds/beep.mp3" preload="auto"></audio>
+<audio id="notify-sound" src="/queuing/assets/sounds/alarm.mp3" preload="auto"></audio>
 <div class="main-container">
     <div class="left-panel">
         <h2>Now Serving</h2>
@@ -192,12 +192,49 @@ function fetchNowServing() {
         });
 }
 
-
-
 // Load every 2 seconds
 setInterval(fetchNowServing, 2000);
 fetchNowServing();
 </script>
+
+<audio id="notify-sound" src="/queuing/assets/sounds/alarm.mp3" preload="auto"></audio>
+
+<script>
+    const socket = new WebSocket('ws://localhost:8080');
+
+    socket.onopen = function () {
+        // Identify this as the display client
+        socket.send(JSON.stringify({ type: 'register', client: 'display' }));
+    };
+
+    socket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+
+        if (data.type === 'notify') {
+            const audio = document.getElementById('notify-sound');
+
+            // Reset and play the audio
+            audio.pause();
+            audio.currentTime = 0;
+
+            audio.play().then(() => {
+                audio.onended = function () {
+                    const message = `${data.fullName}, please proceed to ${data.tellerName} please. Again, ${data.fullName}, please proceed to ${data.tellerName} please.`;
+
+                    const utterance = new SpeechSynthesisUtterance(message);
+                    utterance.lang = 'en-PH';
+                    utterance.pitch = 1;
+                    utterance.rate = 1;
+                    speechSynthesis.speak(utterance);
+                };
+            }).catch(error => {
+                console.error("Audio play failed:", error);
+            });
+        }
+    };
+</script>
+
+
 
 </body>
 </html>

@@ -233,7 +233,8 @@ body.modal-blur::before {
 
 
    <!-- Next Customer Modal -->
-<div class="modal custom-modal" id="nextCustomerModal" tabindex="-1" role="dialog">
+<div class="modal custom-modal" id="nextCustomerModal" tabindex="-1" role="dialog"
+     data-backdrop="static" data-keyboard="false">
   <div class="modal-dialog">
     <div class="modal-content text-center">
       <div class="modal-header border-0 d-block">
@@ -247,13 +248,13 @@ body.modal-blur::before {
         <input type="hidden" id="next-submission-id">
       </div>
       <div class="modal-footer justify-content-center border-0">
-      <button class="btn btn-info px-5 py-2 mr-2" id="notify-btn">Notify</button>
-    <button class="btn btn-success px-5 py-2" id="done-btn">Done</button>
-</div>
-
+        <button class="btn btn-info px-5 py-2 mr-2" id="notify-btn">Notify</button>
+        <button class="btn btn-success px-5 py-2" id="done-btn">Done</button>
+      </div>
     </div>
   </div>
 </div>
+
 
 
 
@@ -366,24 +367,22 @@ $('#nextCustomerModal').on('hidden.bs.modal', function () {
 });
 
 document.getElementById('notify-btn').addEventListener('click', function () {
-    const audio = document.getElementById('notify-sound');
     const fullName = document.getElementById('full-name').textContent.trim();
     const tellerName = "<?php echo $_SESSION['code_name'] ?? 'the teller'; ?>";
 
-    // Play beep sound first
-    audio.play();
+    const socket = new WebSocket('ws://localhost:8080');
 
-    // After beep is done, speak message
-    audio.onended = function () {
-        const message = `${fullName}, please proceed to ${tellerName} please. again, ${fullName}, please proceed to ${tellerName} please.`;
-
-        const utterance = new SpeechSynthesisUtterance(message);
-        utterance.lang = 'en-PH';
-        utterance.pitch = 1;
-        utterance.rate = 1;
-        speechSynthesis.speak(utterance);
+    socket.onopen = function () {
+        socket.send(JSON.stringify({
+            type: 'notify',
+            fullName: fullName,
+            tellerName: tellerName
+        }));
+        socket.close();
     };
 });
+
+
 
 function updateDateTime() {
         const now = new Date();
