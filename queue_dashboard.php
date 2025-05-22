@@ -169,7 +169,7 @@ body.modal-blur::before {
                                 <div class="col-md-6">
                                     <!-- Teller Interface -->
                                     <div class="card shadow-sm p-3">
-                                        <h4 class="text-center">Teller Interface</h4>
+                                        <h4 class="text-center">Counter Interface</h4>
                                         <div class="text-center mt-3">
                                             <h5 id="current-customer">Waiting for next customer...</h5>
                                         </div>
